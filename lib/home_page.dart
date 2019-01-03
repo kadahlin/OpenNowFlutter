@@ -52,38 +52,3 @@ class HomePage extends StatelessWidget {
     );
   }
 }
-
-class _SearchingAnimation extends StatefulWidget {
-  _SearchingAnimationState createState() => _SearchingAnimationState();
-}
-
-class _SearchingAnimationState extends State<_SearchingAnimation> with SingleTickerProviderStateMixin {
-  Animation<double> _heightAnimation;
-  AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(duration: const Duration(milliseconds: 5000), vsync: this);
-    _heightAnimation = Tween(begin: 0.0, end: 2.0 * math.pi).animate(_controller)
-      ..addListener(() {
-        setState(() {});
-      });
-    _controller.repeat();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Transform.rotate(
-        angle: _heightAnimation.value,
-        child: Text("Spinning"),
-      ),
-    );
-  }
-
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-}

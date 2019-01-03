@@ -1,3 +1,4 @@
+import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_permissions/simple_permissions.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -50,8 +51,8 @@ class _HomePageBodyState extends State<HomePageBody> with WidgetsBindingObserver
           if (snapshot.hasError) {
             return _createStatusWidget(context, snapshot.error);
           }
-          if (snapshot.data.permissionStatus != null) {
-            return _createStatusWidget(context, snapshot.data.permissionStatus);
+          if (snapshot.data.uiStatus != UiStatus.Loaded) {
+            return _createStatusWidget(context, snapshot.data.uiStatus);
           }
           return Padding(
             padding: EdgeInsets.only(left: 12.0, top: 12.0, right: 8.0, bottom: 28.0),
@@ -131,12 +132,20 @@ class _HomePageBodyState extends State<HomePageBody> with WidgetsBindingObserver
     );
   }
 
-  Widget _createStatusWidget(BuildContext context, PermissionStatus status) {
+  ///Create widget that represents the body in this current UI state
+  Widget _createStatusWidget(BuildContext context, UiStatus status) {
     String statusText;
     Widget statusButtonWidget;
     print("Creating status widget for $status");
     switch (status) {
-      case PermissionStatus.denied:
+      case UiStatus.Loading:
+        {
+          return FlareActor(
+            "ui_assets/open_now_animation.flr",
+            animation: "searching",
+          );
+        }
+      case UiStatus.Denied:
         {
           statusText = "Location permissions not granted.";
           if (Theme.of(context).platform == TargetPlatform.iOS) {
@@ -150,7 +159,7 @@ class _HomePageBodyState extends State<HomePageBody> with WidgetsBindingObserver
           }
           break;
         }
-      case PermissionStatus.deniedNeverAsk:
+      case UiStatus.DeniedDontAsk:
         {
           statusText = "Location disabled for this app, please enable in settings to continue.";
           statusButtonWidget = MaterialButton(
@@ -162,8 +171,8 @@ class _HomePageBodyState extends State<HomePageBody> with WidgetsBindingObserver
           );
           break;
         }
-      case PermissionStatus.authorized:
-      case PermissionStatus.notDetermined:
+      case UiStatus.Prompt:
+      case UiStatus.Authorized:
         {
           //user has not been prompted
           statusText = "Use the button on the bottom to begin searching for restaurants.";

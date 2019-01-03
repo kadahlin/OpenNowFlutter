@@ -14,14 +14,15 @@ const String URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json
 const double METERS_PER_MILE = 1609.34;
 
 enum SortingMethod { alphabetical, distance }
+enum UiStatus { Prompt, Authorized, Denied, DeniedDontAsk, Loading, Loaded}
 
 ///Data class that gets emitted from the stream that contains any data returned from the API
 ///along with the current permission status
 class RestaurantResult {
-  PermissionStatus permissionStatus;
+  UiStatus uiStatus;
   List<Restaurant> restaurants;
 
-  RestaurantResult(this.permissionStatus, this.restaurants);
+  RestaurantResult(this.uiStatus, this.restaurants);
 }
 
 ///View Model that the app widgets can subscribe to for place updates
@@ -29,13 +30,14 @@ class RestaurantViewModel extends ViewModel {
 
   //The initial state of the data is not determined, we have not yet queried for the location permission
   final _resultSubject =
-      BehaviorSubject<RestaurantResult>(seedValue: RestaurantResult(PermissionStatus.notDetermined, null));
+      BehaviorSubject<RestaurantResult>(seedValue: RestaurantResult(UiStatus.Prompt, null));
 
   Observable<RestaurantResult> get restaurants => _resultSubject.stream;
 
   List<Restaurant> _currentRestaurants = [];
 
   loadRestaurantList(double distance) async {
+    _resultSubject.add(RestaurantResult(UiStatus.Loading, null));
     Map<String, double> location;
     try {
       location = await Location().getLocation();
@@ -56,8 +58,11 @@ class RestaurantViewModel extends ViewModel {
       print(response.body);
       final decodedJson = jsonDecode(response.body);
 
-      //To use the example data
+      //To use the example data and simulate a delay for the animation
 //      final decodedJson = jsonDecode(EXAMPLE);
+//      await Future.delayed(const Duration(
+//          seconds: 3));
+
       restaurants.addAll(_getRestaurantsFromJson(decodedJson));
       pageToken = decodedJson['next_page_token'];
       if (pageToken != null) {
@@ -72,7 +77,7 @@ class RestaurantViewModel extends ViewModel {
     });
     _currentRestaurants = restaurants;
     print("there were ${_currentRestaurants.length} total results from the query");
-    _resultSubject.add(RestaurantResult(null, _currentRestaurants));
+    _resultSubject.add(RestaurantResult(UiStatus.Loaded, _currentRestaurants));
   }
 
   ///Sort the current list of restaurants by a certain [SortingMethod]
@@ -95,9 +100,10 @@ class RestaurantViewModel extends ViewModel {
 
   void updateWithStatus(PermissionStatus status) async {
     final latest = _resultSubject.value;
-    print("updating status from ${latest.permissionStatus} to $status");
-    if (latest.permissionStatus != null && latest.permissionStatus != status) {
-      _resultSubject.add(RestaurantResult(status, null));
+    final uiStatus = convertToUiStatus(status);
+    print("updating status from ${latest.uiStatus} to $uiStatus");
+    if (latest.uiStatus != UiStatus.Loaded && latest.uiStatus != uiStatus) {
+      _resultSubject.add(RestaurantResult(uiStatus, null));
     }
   }
 
@@ -136,6 +142,20 @@ class RestaurantViewModel extends ViewModel {
     final encodedJson = await rootBundle.loadString('key.json');
     final decodedJson = jsonDecode(encodedJson);
     return decodedJson["places_key"];
+  }
+
+  UiStatus convertToUiStatus(PermissionStatus status) {
+    switch(status) {
+      case PermissionStatus.authorized:
+      case PermissionStatus.notDetermined:
+      case PermissionStatus.restricted:
+        return UiStatus.Prompt;
+      case PermissionStatus.deniedNeverAsk:
+        return UiStatus.DeniedDontAsk;
+      case PermissionStatus.denied:
+        return UiStatus.Denied;
+    }
+    return UiStatus.Prompt;
   }
 }
 
