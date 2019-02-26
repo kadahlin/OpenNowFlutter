@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_redux/flutter_redux.dart';
+import 'package:redux/redux.dart';
+import 'package:redux_thunk/redux_thunk.dart';
 
 import 'home_page.dart';
-import 'restaurant_view_model.dart';
-import 'view_model.dart';
+import 'open_now_redux.dart';
 
 class OpenNowApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ViewModelProvider<RestaurantViewModel>(
+
+    final store = Store<RestaurantResult>(
+        appReducers,
+        middleware: [thunkMiddleware],
+        initialState: RestaurantResult(UiStatus.Prompt, null));
+
+    return StoreProvider<RestaurantResult>(
+      store: store,
       child: MaterialApp(
         title: 'Open Now',
         theme: ThemeData(
@@ -15,7 +24,6 @@ class OpenNowApp extends StatelessWidget {
         ),
         home: HomePage(),
       ),
-      bloc: RestaurantViewModel(),
     );
   }
 }

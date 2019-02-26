@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'view_model.dart';
-import 'restaurant_view_model.dart';
+import 'package:flutter_redux/flutter_redux.dart';
+import 'open_now_redux.dart';
 
 //Allow the user to select a range via a slider
 class DistanceDialog extends StatelessWidget {
@@ -42,29 +42,35 @@ class _DistanceSliderState extends State<_DistanceSlider> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        Slider(
-          value: _sliderValue,
-          min: 1,
-          max: 20,
-          divisions: 19,
-          onChanged: (value) {
-            setState(() {
-              _sliderValue = value;
-            });
-          },
-        ),
-        Text("${_sliderValue.toInt()} mile${_sliderValue > 1 ? 's' : ''}"),
-        MaterialButton(
-          onPressed: () {
-            ViewModelProvider.of<RestaurantViewModel>(context)
-                .loadRestaurantList(_sliderValue);
-            Navigator.of(context).pop();
-          },
-          child: Text("Search"),
-        )
-      ],
+    return StoreConnector<RestaurantResult, ActionCallback>(
+      converter: (store) {
+        return (action) => store.dispatch(action);
+      },
+      builder: (context, callback) {
+        return Column(
+          children: <Widget>[
+            Slider(
+              value: _sliderValue,
+              min: 1,
+              max: 20,
+              divisions: 19,
+              onChanged: (value) {
+                setState(() {
+                  _sliderValue = value;
+                });
+              },
+            ),
+            Text("${_sliderValue.toInt()} mile${_sliderValue > 1 ? 's' : ''}"),
+            MaterialButton(
+              onPressed: () {
+                callback(loadRestaurantList(_sliderValue));
+                Navigator.of(context).pop();
+              },
+              child: Text("Search"),
+            )
+          ],
+        );
+      }
     );
   }
 }

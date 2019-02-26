@@ -1,27 +1,26 @@
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_redux/flutter_redux.dart';
+import 'package:open_now/restaurant_api.dart';
 import 'package:simple_permissions/simple_permissions.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'restaurant.dart';
+import 'open_now_redux.dart';
 import 'restaurant_expansion_tile.dart';
-import 'restaurant_view_model.dart';
 
 class HomePageBody extends StatefulWidget {
-  final RestaurantViewModel viewModel;
+  final ActionCallback storeCallback;
 
-  HomePageBody({@required this.viewModel});
+  HomePageBody({@required this.storeCallback});
 
   @override
-  _HomePageBodyState createState() => _HomePageBodyState(viewModel: viewModel);
+  _HomePageBodyState createState() => _HomePageBodyState(storeCallback: storeCallback);
 }
 
 class _HomePageBodyState extends State<HomePageBody> with WidgetsBindingObserver {
-  RestaurantViewModel _viewModel;
+  ActionCallback storeCallback;
 
-  _HomePageBodyState({RestaurantViewModel viewModel}) {
-    _viewModel = viewModel;
-  }
+  _HomePageBodyState({@required this.storeCallback});
 
   @override
   void initState() {
@@ -34,33 +33,29 @@ class _HomePageBodyState extends State<HomePageBody> with WidgetsBindingObserver
     if (state == AppLifecycleState.resumed) {
       print("app state is resumed");
       if (await SimplePermissions.checkPermission(Permission.WhenInUseLocation)) {
-        _viewModel.updateWithStatus(PermissionStatus.authorized);
+        storeCallback(UpdatePermissionAction(PermissionStatus.authorized));
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<RestaurantResult>(
-        stream: _viewModel.restaurants,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            print("snapshot has no data");
-            return Center(child: Text("Unknown error occured."));
+    return StoreConnector<RestaurantResult, RestaurantResult>(
+        converter: (store) => store.state,
+        builder: (context, result) {
+          if (result.exception != null) {
+            return _createStatusWidget(context, result.uiStatus);
           }
-          if (snapshot.hasError) {
-            return _createStatusWidget(context, snapshot.error);
-          }
-          if (snapshot.data.uiStatus != UiStatus.Loaded) {
-            return _createStatusWidget(context, snapshot.data.uiStatus);
+          if (result.uiStatus != UiStatus.Loaded) {
+            return _createStatusWidget(context, result.uiStatus);
           }
           return Padding(
             padding: EdgeInsets.only(left: 12.0, top: 12.0, right: 8.0, bottom: 28.0),
             child: Center(
               child: ListView.builder(
-                  itemCount: snapshot.data.restaurants.length,
+                  itemCount: result.restaurants.length,
                   itemBuilder: (context, index) =>
-                      _createExpansionTile(index: index, restaurant: snapshot.data.restaurants[index])),
+                      _createExpansionTile(index: index, restaurant: result.restaurants[index])),
             ),
           );
         });
@@ -147,7 +142,7 @@ class _HomePageBodyState extends State<HomePageBody> with WidgetsBindingObserver
         }
       case UiStatus.Denied:
         {
-          statusText = "Location permissions not granted.";
+          statusText = "Location permissions are not granted.";
           if (Theme.of(context).platform == TargetPlatform.iOS) {
             statusButtonWidget = MaterialButton(
               color: Theme.of(context).primaryColor,
@@ -178,6 +173,7 @@ class _HomePageBodyState extends State<HomePageBody> with WidgetsBindingObserver
           statusText = "Use the button on the bottom to begin searching for restaurants.";
           break;
         }
+      case UiStatus.Error:
       default:
         {
           print("trying to create status widget for $status");
