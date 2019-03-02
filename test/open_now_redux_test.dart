@@ -28,7 +28,7 @@ void main() {
 
     test("Sorting methods should create a new list inside the state", () {
       final store = Store<RestaurantResult>(appReducers,
-          initialState: RestaurantResult(UiStatus.Loaded, [bRestaurant, cRestaurant, aRestaurant]));
+          initialState: RestaurantResult(UiStatus.loaded, [bRestaurant, cRestaurant, aRestaurant]));
 
       store.dispatch(SortRestaurantAction(SortingMethod.alphabetical));
       expect(store.state.restaurants, [aRestaurant, bRestaurant, cRestaurant]);
@@ -41,7 +41,7 @@ void main() {
       final store = _getDefaultStore();
 
       store.dispatch(RestaurantsLoadedAction([aRestaurant, bRestaurant]));
-      expect(store.state.uiStatus, UiStatus.Loaded);
+      expect(store.state.uiStatus, UiStatus.loaded);
       expect(store.state.restaurants, [aRestaurant, bRestaurant]);
     });
 
@@ -49,26 +49,26 @@ void main() {
       final store = _getDefaultStore();
 
       store.dispatch(UpdatePermissionAction(PermissionStatus.authorized));
-      expect(store.state.uiStatus, UiStatus.Prompt);
+      expect(store.state.uiStatus, UiStatus.prompt);
       store.dispatch(UpdatePermissionAction(PermissionStatus.notDetermined));
-      expect(store.state.uiStatus, UiStatus.Prompt);
+      expect(store.state.uiStatus, UiStatus.prompt);
       store.dispatch(UpdatePermissionAction(PermissionStatus.deniedNeverAsk));
-      expect(store.state.uiStatus, UiStatus.DeniedDontAsk);
+      expect(store.state.uiStatus, UiStatus.deniedDontAsk);
       store.dispatch(UpdatePermissionAction(PermissionStatus.denied));
-      expect(store.state.uiStatus, UiStatus.Denied);
+      expect(store.state.uiStatus, UiStatus.denied);
       store.dispatch(UpdatePermissionAction(PermissionStatus.restricted));
-      expect(store.state.uiStatus, UiStatus.Prompt);
+      expect(store.state.uiStatus, UiStatus.prompt);
     });
 
     test('loading action correctly updates ui status', () {
       final store = _getDefaultStore();
       store.dispatch(RestaurantLoadingAction());
-      expect(store.state.uiStatus, UiStatus.Loading);
+      expect(store.state.uiStatus, UiStatus.loading);
     });
   });
 }
 
 Store<RestaurantResult> _getDefaultStore() => Store<RestaurantResult>(
       appReducers,
-      initialState: RestaurantResult(UiStatus.Prompt, null),
+      initialState: RestaurantResult(UiStatus.prompt, null),
     );

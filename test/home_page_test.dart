@@ -60,7 +60,7 @@ void main() {
 
 Store<RestaurantResult> _getMockStore() => Store<RestaurantResult>(
       appReducers,
-      initialState: RestaurantResult(UiStatus.Prompt, null),
+      initialState: RestaurantResult(UiStatus.prompt, null),
     );
 
 Widget _getTestHomePage(Store<RestaurantResult> store) =>

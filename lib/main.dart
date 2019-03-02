@@ -13,7 +13,7 @@ class OpenNowApp extends StatelessWidget {
     final store = Store<RestaurantResult>(
         appReducers,
         middleware: [thunkMiddleware],
-        initialState: RestaurantResult(UiStatus.Prompt, null));
+        initialState: RestaurantResult(UiStatus.prompt, null));
 
     return StoreProvider<RestaurantResult>(
       store: store,

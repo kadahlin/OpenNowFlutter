@@ -4,7 +4,7 @@ import 'package:redux_thunk/redux_thunk.dart';
 import 'package:simple_permissions/simple_permissions.dart';
 
 enum SortingMethod { alphabetical, distance }
-enum UiStatus { Prompt, Authorized, Denied, DeniedDontAsk, Loading, Loaded, Error }
+enum UiStatus { prompt, authorized, denied, deniedDontAsk, loading, loaded, error }
 
 typedef ActionCallback = Function(dynamic action);
 
@@ -64,11 +64,11 @@ RestaurantResult appReducers(RestaurantResult state, dynamic action) {
   } else if (action is UpdatePermissionAction) {
     return _updatePermissionStatus(state, action);
   } else if (action is RestaurantLoadErrorAction) {
-    return RestaurantResult(UiStatus.Error, null, exception: action.exception);
+    return RestaurantResult(UiStatus.error, null, exception: action.exception);
   } else if (action is RestaurantLoadingAction) {
-    return RestaurantResult(UiStatus.Loading, state.restaurants);
+    return RestaurantResult(UiStatus.loading, state.restaurants);
   } else if (action is RestaurantsLoadedAction) {
-    return RestaurantResult(UiStatus.Loaded, action.restaurants);
+    return RestaurantResult(UiStatus.loaded, action.restaurants);
   }
   return state;
 }
@@ -93,7 +93,7 @@ RestaurantResult _updatePermissionStatus(RestaurantResult state, UpdatePermissio
   final currentStatus = state.uiStatus;
   final uiStatus = convertToUiStatus(action.status);
   print("updating status from $currentStatus to $uiStatus");
-  if (currentStatus != UiStatus.Loaded && currentStatus != uiStatus) {
+  if (currentStatus != UiStatus.loaded && currentStatus != uiStatus) {
     return (RestaurantResult(uiStatus, null));
   }
   return state;
@@ -104,11 +104,11 @@ UiStatus convertToUiStatus(PermissionStatus status) {
     case PermissionStatus.authorized:
     case PermissionStatus.notDetermined:
     case PermissionStatus.restricted:
-      return UiStatus.Prompt;
+      return UiStatus.prompt;
     case PermissionStatus.deniedNeverAsk:
-      return UiStatus.DeniedDontAsk;
+      return UiStatus.deniedDontAsk;
     case PermissionStatus.denied:
-      return UiStatus.Denied;
+      return UiStatus.denied;
   }
-  return UiStatus.Prompt;
+  return UiStatus.prompt;
 }

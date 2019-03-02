@@ -46,7 +46,7 @@ class _HomePageBodyState extends State<HomePageBody> with WidgetsBindingObserver
           if (result.exception != null) {
             return _createStatusWidget(context, result.uiStatus);
           }
-          if (result.uiStatus != UiStatus.Loaded) {
+          if (result.uiStatus != UiStatus.loaded) {
             return _createStatusWidget(context, result.uiStatus);
           }
           return Padding(
@@ -133,7 +133,7 @@ class _HomePageBodyState extends State<HomePageBody> with WidgetsBindingObserver
     Widget statusButtonWidget;
     print("Creating status widget for $status");
     switch (status) {
-      case UiStatus.Loading:
+      case UiStatus.loading:
         {
           return Padding(
             key: Key("loading_animation"),
@@ -144,7 +144,7 @@ class _HomePageBodyState extends State<HomePageBody> with WidgetsBindingObserver
             ),
           );
         }
-      case UiStatus.Denied:
+      case UiStatus.denied:
         {
           statusText = "Location permissions are not granted.";
           if (Theme.of(context).platform == TargetPlatform.iOS) {
@@ -158,7 +158,7 @@ class _HomePageBodyState extends State<HomePageBody> with WidgetsBindingObserver
           }
           break;
         }
-      case UiStatus.DeniedDontAsk:
+      case UiStatus.deniedDontAsk:
         {
           statusText = "Location disabled for this app, please enable in settings to continue.";
           statusButtonWidget = MaterialButton(
@@ -170,14 +170,14 @@ class _HomePageBodyState extends State<HomePageBody> with WidgetsBindingObserver
           );
           break;
         }
-      case UiStatus.Prompt:
-      case UiStatus.Authorized:
+      case UiStatus.prompt:
+      case UiStatus.authorized:
         {
           //user has not been prompted
           statusText = "Use the button on the bottom to begin searching for restaurants.";
           break;
         }
-      case UiStatus.Error:
+      case UiStatus.error:
       default:
         {
           print("trying to create status widget for $status");
