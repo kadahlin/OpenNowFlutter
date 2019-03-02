@@ -34,7 +34,7 @@ class HomePage extends StatelessWidget {
             )
           ],
         ),
-        body: HomePageBody(),
+        body: HomePageBody(storeCallback: callback,),
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
             final status = await SimplePermissions.requestPermission(Permission.WhenInUseLocation);

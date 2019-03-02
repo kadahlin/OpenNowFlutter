@@ -16,7 +16,7 @@ class RestaurantResult {
   RestaurantResult(this.uiStatus, this.restaurants, {this.exception});
 }
 
-class ListLoadingAction {}
+class RestaurantLoadingAction {}
 
 class SortRestaurantAction {
   SortingMethod method;
@@ -24,10 +24,10 @@ class SortRestaurantAction {
   SortRestaurantAction(this.method);
 }
 
-class LoadErrorAction {
+class RestaurantLoadErrorAction {
   Exception exception;
 
-  LoadErrorAction(this.exception);
+  RestaurantLoadErrorAction(this.exception);
 }
 
 class RestaurantsLoadedAction {
@@ -44,13 +44,13 @@ class UpdatePermissionAction {
 
 ThunkAction<RestaurantResult> loadRestaurantList(double distance) {
   return (Store<RestaurantResult> store) async {
-    store.dispatch(ListLoadingAction());
+    store.dispatch(RestaurantLoadingAction());
     List<Restaurant> restaurants;
     try {
       restaurants = await getRestaurants(distance);
     } catch (e) {
       print("Error when loading from api");
-      store.dispatch(LoadErrorAction(e));
+      store.dispatch(RestaurantLoadErrorAction(e));
       return;
     }
     print("there were ${restaurants.length} total results from the query");
@@ -63,9 +63,9 @@ RestaurantResult appReducers(RestaurantResult state, dynamic action) {
     return _sortRestaurants(state, action);
   } else if (action is UpdatePermissionAction) {
     return _updatePermissionStatus(state, action);
-  } else if (action is LoadErrorAction) {
+  } else if (action is RestaurantLoadErrorAction) {
     return RestaurantResult(UiStatus.Error, null, exception: action.exception);
-  } else if (action is ListLoadingAction) {
+  } else if (action is RestaurantLoadingAction) {
     return RestaurantResult(UiStatus.Loading, state.restaurants);
   } else if (action is RestaurantsLoadedAction) {
     return RestaurantResult(UiStatus.Loaded, action.restaurants);

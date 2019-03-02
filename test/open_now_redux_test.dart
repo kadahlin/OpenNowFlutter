@@ -21,7 +21,7 @@ void main() {
       final store = _getDefaultStore();
 
       final exception = Exception("test exception");
-      store.dispatch(LoadErrorAction(exception));
+      store.dispatch(RestaurantLoadErrorAction(exception));
 
       expect(store.state.exception, exception);
     });
@@ -62,7 +62,7 @@ void main() {
 
     test('loading action correctly updates ui status', () {
       final store = _getDefaultStore();
-      store.dispatch(ListLoadingAction());
+      store.dispatch(RestaurantLoadingAction());
       expect(store.state.uiStatus, UiStatus.Loading);
     });
   });

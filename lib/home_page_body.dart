@@ -72,7 +72,7 @@ class _HomePageBodyState extends State<HomePageBody> with WidgetsBindingObserver
               Padding(
                 padding: EdgeInsets.only(right: 12.0),
                 child: Text(
-                  index.toString(),
+                    (index + 1).toString(),
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
@@ -135,9 +135,13 @@ class _HomePageBodyState extends State<HomePageBody> with WidgetsBindingObserver
     switch (status) {
       case UiStatus.Loading:
         {
-          return FlareActor(
-            "ui_assets/open_now_animation.flr",
-            animation: "searching",
+          return Padding(
+            key: Key("loading_animation"),
+            padding: EdgeInsets.all(0.0),
+            child: FlareActor(
+              "ui_assets/open_now_animation.flr",
+              animation: "searching",
+            ),
           );
         }
       case UiStatus.Denied:

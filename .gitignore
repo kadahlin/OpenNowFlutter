@@ -10,6 +10,8 @@
 .history
 .svn/
 key.json
+coverage/
+coveragereport/
 
 # IntelliJ related
 *.iml
