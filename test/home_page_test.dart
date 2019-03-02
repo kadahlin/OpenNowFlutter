@@ -6,6 +6,7 @@ import 'package:open_now/home_page.dart';
 import 'package:open_now/open_now_redux.dart';
 import 'package:open_now/restaurant_api.dart';
 import 'package:redux/redux.dart';
+import 'package:simple_permissions/simple_permissions.dart';
 
 void main() {
   testWidgets('any loaded results should disappear if an error is passed to the home page',
@@ -41,6 +42,19 @@ void main() {
     await tester.pumpWidget(widget);
 
     expect(find.byKey(testKey), findsOneWidget);
+  });
+
+  testWidgets('denied and deniedDontAsk should present differently to the user', (WidgetTester tester) async {
+    final store = _getMockStore();
+    final widget = _getTestHomePage(store);
+
+    store.dispatch(UpdatePermissionAction(PermissionStatus.denied));
+    await tester.pumpWidget(widget);
+    expect(find.text("Location permissions are not granted."), findsOneWidget);
+
+    store.dispatch(UpdatePermissionAction(PermissionStatus.deniedNeverAsk));
+    await tester.pumpWidget(widget);
+    expect(find.text("Location disabled for this app, please enable in settings to continue."), findsOneWidget);
   });
 }
 
